@@ -64,8 +64,16 @@ async fn main() -> Result<()> {
     // Initialize capture engine
     let capture_engine = CaptureEngine::new(&socks_addr, config.capture.clone());
 
+    // Data directory for spider config and other state
+    let data_dir = config
+        .capture
+        .storage_path
+        .parent()
+        .map(|p| p.to_path_buf())
+        .unwrap_or_else(|| PathBuf::from("./data"));
+
     // Create application state
-    let state = AppState::new(db, capture_engine, tor_client);
+    let state = AppState::new(db, capture_engine, tor_client, data_dir);
 
     // Start scheduler in background
     let scheduler_state = state.clone();

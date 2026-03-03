@@ -8,7 +8,8 @@ use axum::{
     Form,
 };
 use serde::Deserialize;
-use tor_capture_core::{Capture, Target, UserAgentType};
+use tor_capture_core::{Capture, SpiderConfig, Target, UserAgentType};
+use tracing::info;
 use uuid::Uuid;
 
 #[derive(Deserialize)]
@@ -22,6 +23,11 @@ pub struct TargetForm {
     pub viewport_width: Option<i32>,
     pub viewport_height: Option<i32>,
     pub wait_after_load_ms: Option<i64>,
+    // Spider options
+    pub spider_enabled: Option<String>,
+    pub spider_max_depth: Option<u32>,
+    pub spider_max_urls: Option<usize>,
+    pub spider_delay_ms: Option<u64>,
 }
 
 pub async fn list(State(state): State<AppState>) -> impl IntoResponse {
@@ -60,6 +66,18 @@ pub async fn create(
 
     match state.target_repo.create(&target) {
         Ok(()) => {
+            // Save spider config if enabled
+            if form.spider_enabled.is_some() {
+                let spider_config = SpiderConfig {
+                    enabled: true,
+                    max_depth: form.spider_max_depth.unwrap_or(2),
+                    same_domain_only: true,
+                    max_urls: form.spider_max_urls.unwrap_or(100),
+                    delay_ms: form.spider_delay_ms.unwrap_or(1000),
+                };
+                let _ = state.spider_engine.set_config(&target.id, spider_config).await;
+            }
+
             let template = TargetCardTemplate { target };
             (
                 StatusCode::CREATED,
@@ -114,12 +132,29 @@ pub async fn update(
             target.wait_after_load_ms = form.wait_after_load_ms.unwrap_or(target.wait_after_load_ms);
 
             match state.target_repo.update(&target) {
-                Ok(()) => (
-                    StatusCode::OK,
-                    [("HX-Trigger", "target-updated")],
-                    "Updated",
-                )
-                    .into_response(),
+                Ok(()) => {
+                    // Update spider config
+                    if form.spider_enabled.is_some() {
+                        let spider_config = SpiderConfig {
+                            enabled: true,
+                            max_depth: form.spider_max_depth.unwrap_or(2),
+                            same_domain_only: true,
+                            max_urls: form.spider_max_urls.unwrap_or(100),
+                            delay_ms: form.spider_delay_ms.unwrap_or(1000),
+                        };
+                        let _ = state.spider_engine.set_config(&target.id, spider_config).await;
+                    } else {
+                        // Disable spider if checkbox not checked
+                        let _ = state.spider_engine.remove_config(&target.id).await;
+                    }
+
+                    (
+                        StatusCode::OK,
+                        [("HX-Trigger", "target-updated")],
+                        "Updated",
+                    )
+                        .into_response()
+                }
                 Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
             }
         }
@@ -147,6 +182,13 @@ pub async fn trigger_capture(
         Ok(None) => return (StatusCode::NOT_FOUND, "Target not found").into_response(),
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     };
+
+    // Check if spider mode is enabled
+    if let Some(spider_config) = state.spider_engine.get_config(&target.id).await {
+        if spider_config.enabled {
+            return trigger_spider_capture(state, target, spider_config).await;
+        }
+    }
 
     // Create capture record
     let mut capture = Capture::new(target.id, None);
@@ -192,6 +234,76 @@ pub async fn trigger_capture(
     (
         StatusCode::ACCEPTED,
         [("HX-Trigger", "capture-started")],
+        Html(template.render()),
+    )
+        .into_response()
+}
+
+async fn trigger_spider_capture(
+    state: AppState,
+    target: Target,
+    config: SpiderConfig,
+) -> axum::response::Response {
+    info!(
+        "Starting spider capture for target {} (max_depth: {}, max_urls: {})",
+        target.id, config.max_depth, config.max_urls
+    );
+
+    let spider_engine = state.spider_engine.clone();
+    let capture_engine = state.capture_engine.clone();
+    let capture_repo = state.capture_repo.clone();
+    let target_clone = target.clone();
+    let config_clone = config.clone();
+
+    // Start spider in background
+    tokio::spawn(async move {
+        let _ = spider_engine
+            .execute_spider(&target_clone, &config_clone, |result, url, depth| {
+                // Create capture record for each spidered URL
+                let mut capture = Capture::new(target_clone.id, None);
+                capture.mark_started();
+                capture.final_url = Some(url.to_string());
+                capture.page_title = result.page_title.clone();
+
+                // Save capture to DB
+                if capture_repo.create(&capture).is_ok() {
+                    // Save files
+                    let capture_engine_clone = capture_engine.clone();
+                    let target_for_save = target_clone.clone();
+                    let capture_repo_clone = capture_repo.clone();
+
+                    // Note: This is sync context, so we use blocking approach
+                    let rt = tokio::runtime::Handle::current();
+                    rt.block_on(async {
+                        if let Err(e) = capture_engine_clone
+                            .save_capture(&target_for_save, &result, &mut capture)
+                            .await
+                        {
+                            capture.mark_failed("save_error", &e.to_string());
+                        } else {
+                            capture.mark_success();
+                        }
+                        let _ = capture_repo_clone.update(&capture);
+                    });
+
+                    info!("Spider captured: {} (depth {})", url, depth);
+                }
+            })
+            .await;
+    });
+
+    let template = CaptureStatusTemplate {
+        capture_id: Uuid::new_v4(),
+        status: "running".to_string(),
+        message: format!(
+            "Spider crawl started (max depth: {}, max URLs: {})",
+            config.max_depth, config.max_urls
+        ),
+    };
+
+    (
+        StatusCode::ACCEPTED,
+        [("HX-Trigger", "spider-started")],
         Html(template.render()),
     )
         .into_response()

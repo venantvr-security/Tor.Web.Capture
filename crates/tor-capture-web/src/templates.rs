@@ -261,6 +261,27 @@ impl TargetFormTemplate {
                         <label class="label"><span class="label-text">Viewport Height</span></label>
                         <input type="number" name="viewport_height" value="1080" class="input input-bordered">
                     </div>
+                    <div class="divider">Spider Options</div>
+                    <div class="form-control">
+                        <label class="label cursor-pointer">
+                            <span class="label-text">Enable Spider Mode</span>
+                            <input type="checkbox" name="spider_enabled" class="checkbox">
+                        </label>
+                        <label class="label"><span class="label-text-alt">Crawl links on the same domain</span></label>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Max Depth</span></label>
+                        <input type="number" name="spider_max_depth" value="2" min="0" max="10" class="input input-bordered">
+                        <label class="label"><span class="label-text-alt">0 = initial page only</span></label>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Max URLs</span></label>
+                        <input type="number" name="spider_max_urls" value="100" min="1" max="1000" class="input input-bordered">
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Delay Between Requests (ms)</span></label>
+                        <input type="number" name="spider_delay_ms" value="1000" min="0" class="input input-bordered">
+                    </div>
                     <div class="form-control mt-6">
                         <button type="submit" class="btn btn-primary">Save Target</button>
                     </div>

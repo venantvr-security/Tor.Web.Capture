@@ -14,3 +14,5 @@ anyhow.workspace = true
 base64.workspace = true
 chrono.workspace = true
 uuid.workspace = true
+scraper = "0.25"
+url.workspace = true

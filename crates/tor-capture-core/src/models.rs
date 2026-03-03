@@ -309,7 +309,7 @@ impl Default for LogLevel {
 }
 
 /// Raw capture result from browser.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CaptureResult {
     pub screenshot_data: Option<Vec<u8>>,
     pub html_content: Option<String>,
@@ -326,4 +326,99 @@ pub struct TorCircuitInfo {
     pub exit_node_ip: Option<String>,
     pub exit_node_country: Option<String>,
     pub is_ready: bool,
+}
+
+// ============================================================================
+// Spider Types
+// ============================================================================
+
+/// Spider configuration for a target.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SpiderConfig {
+    /// Whether spidering is enabled for this target
+    pub enabled: bool,
+    /// Maximum depth to crawl (0 = initial page only)
+    pub max_depth: u32,
+    /// Only follow links on the same domain/IP
+    pub same_domain_only: bool,
+    /// Maximum number of URLs to visit
+    pub max_urls: usize,
+    /// Delay between requests in milliseconds
+    pub delay_ms: u64,
+}
+
+impl Default for SpiderConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            max_depth: 2,
+            same_domain_only: true,
+            max_urls: 100,
+            delay_ms: 1000,
+        }
+    }
+}
+
+/// Spider state tracking visited URLs and queue.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SpiderState {
+    pub target_id: Uuid,
+    pub visited_urls: Vec<String>,
+    pub pending_urls: Vec<SpiderUrl>,
+    pub started_at: DateTime<Utc>,
+    pub last_activity_at: DateTime<Utc>,
+    pub total_captured: usize,
+    pub status: SpiderStatus,
+}
+
+impl SpiderState {
+    pub fn new(target_id: Uuid) -> Self {
+        let now = Utc::now();
+        Self {
+            target_id,
+            visited_urls: Vec::new(),
+            pending_urls: Vec::new(),
+            started_at: now,
+            last_activity_at: now,
+            total_captured: 0,
+            status: SpiderStatus::Idle,
+        }
+    }
+}
+
+/// URL discovered during spider crawl.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SpiderUrl {
+    pub url: String,
+    pub depth: u32,
+    pub discovered_from: Option<String>,
+}
+
+/// Spider execution status.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum SpiderStatus {
+    Idle,
+    Running,
+    Paused,
+    Completed,
+    Failed,
+}
+
+impl Default for SpiderStatus {
+    fn default() -> Self {
+        Self::Idle
+    }
+}
+
+impl std::fmt::Display for SpiderStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Idle => write!(f, "idle"),
+            Self::Running => write!(f, "running"),
+            Self::Paused => write!(f, "paused"),
+            Self::Completed => write!(f, "completed"),
+            Self::Failed => write!(f, "failed"),
+        }
+    }
 }

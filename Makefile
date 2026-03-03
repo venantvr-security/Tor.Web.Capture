@@ -16,16 +16,25 @@ all: build
 # ─────────────────────────────────────────────────────────────
 
 ## Build debug version
+## Note: AWS_LC_SYS_NO_ASM=1 workaround for GCC 9.x bug with aws-lc-sys
 build:
-	$(CARGO) build
+	AWS_LC_SYS_NO_ASM=1 $(CARGO) build
 
 ## Build release version (optimized)
+## Note: If GCC < 10, install clang: sudo apt install clang
+## Then use: CC=clang make release
 release:
-	$(CARGO) build --release
+	@if command -v clang >/dev/null 2>&1; then \
+		CC=clang $(CARGO) build --release; \
+	else \
+		echo "Warning: clang not found. GCC 9.x has a bug with aws-lc-sys."; \
+		echo "Install clang (sudo apt install clang) or upgrade GCC to 10+"; \
+		$(CARGO) build --release; \
+	fi
 
 ## Build all crates
 build-all:
-	$(CARGO) build --workspace
+	AWS_LC_SYS_NO_ASM=1 $(CARGO) build --workspace
 
 # ─────────────────────────────────────────────────────────────
 # Run
@@ -33,23 +42,27 @@ build-all:
 
 ## Run the application (debug)
 run:
-	$(CARGO) run
+	AWS_LC_SYS_NO_ASM=1 $(CARGO) run
 
 ## Run the application (release)
 run-release:
-	$(CARGO) run --release
+	@if command -v clang >/dev/null 2>&1; then \
+		CC=clang $(CARGO) run --release; \
+	else \
+		$(CARGO) run --release; \
+	fi
 
 ## Run with live reload (requires cargo-watch)
 dev:
-	$(CARGO) watch -x run
+	AWS_LC_SYS_NO_ASM=1 $(CARGO) watch -x run
 
 ## Run with environment variables from .env
 run-env:
 	@if [ -f .env ]; then \
-		export $$(cat .env | xargs) && $(CARGO) run; \
+		export $$(cat .env | xargs) && AWS_LC_SYS_NO_ASM=1 $(CARGO) run; \
 	else \
 		echo "No .env file found"; \
-		$(CARGO) run; \
+		AWS_LC_SYS_NO_ASM=1 $(CARGO) run; \
 	fi
 
 # ─────────────────────────────────────────────────────────────
@@ -58,16 +71,16 @@ run-env:
 
 ## Run all tests
 test:
-	$(CARGO) test --workspace
+	AWS_LC_SYS_NO_ASM=1 $(CARGO) test --workspace
 
 ## Run tests with output
 test-verbose:
-	$(CARGO) test --workspace -- --nocapture
+	AWS_LC_SYS_NO_ASM=1 $(CARGO) test --workspace -- --nocapture
 
 ## Run tests for a specific crate
 test-crate:
 	@echo "Usage: make test-crate CRATE=tor-capture-core"
-	@if [ -n "$(CRATE)" ]; then $(CARGO) test -p $(CRATE); fi
+	@if [ -n "$(CRATE)" ]; then AWS_LC_SYS_NO_ASM=1 $(CARGO) test -p $(CRATE); fi
 
 # ─────────────────────────────────────────────────────────────
 # Quality
@@ -83,7 +96,7 @@ fmt-check:
 
 ## Run clippy linter
 clippy:
-	$(CARGO) clippy --workspace --all-targets -- -D warnings
+	AWS_LC_SYS_NO_ASM=1 $(CARGO) clippy --workspace --all-targets -- -D warnings
 
 ## Run all checks (fmt + clippy + test)
 check: fmt-check clippy test
@@ -91,7 +104,7 @@ check: fmt-check clippy test
 
 ## Run cargo check (fast compile check)
 check-compile:
-	$(CARGO) check --workspace
+	AWS_LC_SYS_NO_ASM=1 $(CARGO) check --workspace
 
 # ─────────────────────────────────────────────────────────────
 # Documentation
@@ -130,9 +143,15 @@ setup:
 	@mkdir -p data
 	@echo "Setup complete!"
 
-## Install the binary locally
+## Install the binary locally (requires clang due to GCC bug)
 install:
-	$(CARGO) install --path .
+	@if command -v clang >/dev/null 2>&1; then \
+		CC=clang $(CARGO) install --path .; \
+	else \
+		echo "Error: clang not found. GCC 9.x has a bug with aws-lc-sys."; \
+		echo "Install clang: sudo apt install clang"; \
+		exit 1; \
+	fi
 
 ## Copy default config if not exists
 init-config:
