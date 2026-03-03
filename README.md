@@ -343,6 +343,17 @@ graph TB
 | Google Drive uploads | No | Direct connection |
 | TOR bootstrap | No | Initial consensus download |
 
+## Stack
+
+[![Stack](https://skillicons.dev/icons?i=rust,sqlite,html,css,linux,bash,git&theme=dark)](https://skillicons.dev)
+
+- **Rust** — Langage principal, workspace Cargo avec 7 crates
+- **Arti** — Client TOR pur Rust (pas de daemon externe)
+- **Axum** — Framework web async avec templates HTMX
+- **SQLite** — Base de données locale via rusqlite + r2d2
+- **Chrome CDP** — Capture headless via headless_chrome
+- **Google Drive API** — Upload OAuth2 / Service Account
+
 ## License
 
 MIT License
