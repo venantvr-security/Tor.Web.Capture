@@ -1,0 +1,125 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/tor-capture-core",
+    "crates/tor-capture-network",
+    "crates/tor-capture-browser",
+    "crates/tor-capture-storage",
+    "crates/tor-capture-gdrive",
+    "crates/tor-capture-scheduler",
+    "crates/tor-capture-web",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Tor.Web.Capture"]
+license = "MIT"
+rust-version = "1.75"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.44", features = ["full"] }
+tokio-util = "0.7"
+
+# TOR via Arti
+arti-client = { version = "0.19", features = ["tokio"] }
+arti-hyper = "0.19"
+tor-rtcompat = { version = "0.19", features = ["tokio"] }
+
+# HTTP Client
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "socks", "json"] }
+hyper = { version = "1.5", features = ["full"] }
+hyper-util = "0.1"
+
+# Web framework
+axum = { version = "0.8", features = ["macros", "multipart"] }
+tower = { version = "0.5", features = ["full"] }
+tower-http = { version = "0.6", features = ["fs", "cors", "trace", "compression-gzip"] }
+
+# Templates
+askama = { version = "0.12", features = ["with-axum"] }
+askama_axum = "0.4"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# SQLite (version alignée avec arti-client)
+rusqlite = { version = "0.31", features = ["bundled", "chrono"] }
+r2d2 = "0.8"
+r2d2_sqlite = "0.24"
+
+# Google Drive
+yup-oauth2 = "11"
+google-drive3 = "6"
+
+# Scheduler
+tokio-cron-scheduler = "0.13"
+croner = "2.0"
+
+# Headless browser
+headless_chrome = "1.0"
+
+# Date/Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Configuration
+config = "0.14"
+dotenvy = "0.15"
+
+# Utils
+uuid = { version = "1.11", features = ["v4", "serde"] }
+base64 = "0.22"
+url = { version = "2.5", features = ["serde"] }
+regex = "1.11"
+once_cell = "1.20"
+parking_lot = "0.12"
+
+# Crypto for secrets
+ring = "0.17"
+rand = "0.8"
+
+# Internal crates
+tor-capture-core = { path = "crates/tor-capture-core" }
+tor-capture-network = { path = "crates/tor-capture-network" }
+tor-capture-browser = { path = "crates/tor-capture-browser" }
+tor-capture-storage = { path = "crates/tor-capture-storage" }
+tor-capture-gdrive = { path = "crates/tor-capture-gdrive" }
+tor-capture-scheduler = { path = "crates/tor-capture-scheduler" }
+tor-capture-web = { path = "crates/tor-capture-web" }
+
+[package]
+name = "tor-web-capture"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "tor-web-capture"
+path = "src/main.rs"
+
+[dependencies]
+tor-capture-core.workspace = true
+tor-capture-network.workspace = true
+tor-capture-browser.workspace = true
+tor-capture-storage.workspace = true
+tor-capture-gdrive.workspace = true
+tor-capture-scheduler.workspace = true
+tor-capture-web.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow.workspace = true
+config.workspace = true
+dotenvy.workspace = true
+toml.workspace = true
+parking_lot.workspace = true

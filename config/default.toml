@@ -1,0 +1,33 @@
+# TOR Web Capture Configuration
+
+[web]
+bind_address = "127.0.0.1"
+port = 8080
+static_files_path = "./static"
+templates_path = "./templates"
+
+[tor]
+enabled = true
+data_dir = "./data/tor"
+new_circuit_per_capture = true
+bootstrap_timeout_secs = 120
+socks_port = 9150
+
+[capture]
+storage_path = "./data/captures"
+max_concurrent_captures = 3
+default_timeout_ms = 30000
+# chrome_executable_path = "/usr/bin/chromium"
+default_viewport_width = 1920
+default_viewport_height = 1080
+default_wait_after_load_ms = 2000
+
+[storage]
+database_path = "./data/tor-capture.db"
+pool_size = 5
+
+[gdrive]
+enabled = false
+auto_upload = false
+upload_screenshots = true
+upload_html = true

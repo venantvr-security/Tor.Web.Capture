@@ -1,0 +1,16 @@
+[package]
+name = "tor-capture-browser"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+tor-capture-core.workspace = true
+tor-capture-network.workspace = true
+headless_chrome.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+base64.workspace = true
+chrono.workspace = true
+uuid.workspace = true

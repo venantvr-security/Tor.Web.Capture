@@ -1,0 +1,25 @@
+[package]
+name = "tor-capture-web"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+tor-capture-core.workspace = true
+tor-capture-storage.workspace = true
+tor-capture-network.workspace = true
+tor-capture-browser.workspace = true
+tor-capture-gdrive.workspace = true
+tor-capture-scheduler.workspace = true
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+url.workspace = true

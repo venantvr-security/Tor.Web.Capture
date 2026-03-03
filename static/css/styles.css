@@ -1,0 +1,132 @@
+/* Custom styles for TOR Web Capture */
+
+/* HTMX loading indicators */
+.htmx-indicator {
+    display: none;
+}
+
+.htmx-request .htmx-indicator {
+    display: inline;
+}
+
+.htmx-request.htmx-indicator {
+    display: inline;
+}
+
+/* Loading overlay */
+.htmx-request .loading-overlay {
+    display: flex;
+}
+
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Capture card animations */
+.capture-card {
+    transition: all 0.3s ease;
+}
+
+.capture-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Status badges */
+.status-pending {
+    background-color: #9ca3af;
+}
+
+.status-running {
+    background-color: #fbbf24;
+    animation: pulse 2s infinite;
+}
+
+.status-success {
+    background-color: #10b981;
+}
+
+.status-failed {
+    background-color: #ef4444;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* TOR status indicator */
+.tor-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tor-status::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.tor-status.connected::before {
+    background-color: #10b981;
+    box-shadow: 0 0 10px #10b981;
+}
+
+.tor-status.disconnected::before {
+    background-color: #ef4444;
+}
+
+/* Screenshot preview */
+.screenshot-preview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Cron expression helper */
+.cron-helper {
+    font-family: monospace;
+    background: #f3f4f6;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+/* Toast notifications */
+.toast-container {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 9999;
+}
+
+.toast {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

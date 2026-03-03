@@ -1,0 +1,52 @@
+# Build
+/target/
+**/*.rs.bk
+
+# Dependencies
+Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Data & Runtime
+/data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Config local
+config/local.toml
+config/production.toml
+
+# Tor/Arti cache
+.arti/
+arti_data/
+
+# Google Drive credentials
+credentials.json
+token.json
+service_account.json
+
+# Screenshots & captures
+/captures/
+/screenshots/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug
+*.pdb
