@@ -266,12 +266,82 @@ The following scanner user-agents are available:
 
 ## Security
 
-- All traffic routes through TOR (SOCKS5 proxy)
-- DNS resolution via TOR only
-- WebRTC disabled in Chrome
-- New TOR circuit per capture (configurable)
-- Web interface binds to localhost only
-- Credentials encrypted at rest (AES-256-GCM)
+### Embedded TOR Client
+
+The application embeds its own TOR client via **Arti** (pure Rust TOR implementation). No external TOR daemon required.
+
+```mermaid
+graph LR
+    subgraph "Tor.Web.Capture"
+        Chrome["Chrome Headless"]
+        Arti["Arti TOR Client<br/>SOCKS5 127.0.0.1:9050"]
+    end
+
+    subgraph "TOR Network"
+        Guard["Guard Node"]
+        Middle["Middle Node"]
+        Exit["Exit Node"]
+    end
+
+    Target["Target Website"]
+
+    Chrome -->|"--proxy-server=socks5://..."| Arti
+    Arti --> Guard
+    Guard --> Middle
+    Middle --> Exit
+    Exit --> Target
+```
+
+### Traffic Isolation
+
+```mermaid
+graph TB
+    subgraph "Protected Traffic (via TOR)"
+        Captures["Web Captures"]
+        DNS["DNS Resolution"]
+        PageContent["Page Content"]
+    end
+
+    subgraph "Direct Traffic (no TOR)"
+        WebUI["Web UI (localhost:8080)"]
+        GDrive["Google Drive Upload"]
+        Bootstrap["TOR Bootstrap"]
+    end
+
+    subgraph "Chrome Hardening"
+        Proxy["--proxy-server=socks5"]
+        DNSRule["--host-resolver-rules=MAP * ~NOTFOUND"]
+        NoWebRTC["--disable-webrtc"]
+        Incognito["--incognito"]
+        NoCache["--disable-application-cache"]
+    end
+
+    Captures --> Proxy
+    DNS --> DNSRule
+    PageContent --> NoWebRTC
+```
+
+### Anti-Leak Protections
+
+| Protection | Chrome Flag | Purpose |
+|------------|-------------|---------|
+| **SOCKS5 Proxy** | `--proxy-server=socks5://127.0.0.1:9050` | Route all traffic via TOR |
+| **DNS via TOR** | `--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost` | Prevent DNS leaks |
+| **WebRTC Disabled** | `--disable-webrtc` + `--disable-features=WebRTC` | Prevent IP leaks |
+| **No Cache** | `--disable-application-cache` + `--aggressive-cache-discard` | No persistent data |
+| **Incognito** | `--incognito` | No cookies/history |
+| **Circuit Isolation** | New circuit per capture (configurable) | Prevent correlation |
+
+### What Goes Through TOR
+
+| Traffic Type | Via TOR | Notes |
+|--------------|---------|-------|
+| Web captures (screenshot/HTML) | Yes | All target requests |
+| DNS resolution | Yes | Forced via SOCKS5 |
+| Page assets (JS, CSS, images) | Yes | All resources |
+| Web UI (localhost) | No | Local only |
+| Google Drive uploads | No | Direct connection |
+| TOR bootstrap | No | Initial consensus download |
 
 ## License
 
