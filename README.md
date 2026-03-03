@@ -23,7 +23,7 @@ A Rust application for capturing web pages via TOR with an integrated web interf
 
 ```bash
 # Clone the repository
-git clone https://github.com/youruser/Tor.Web.Capture.git
+git clone https://github.com/venantvr-security/Tor.Web.Capture.git
 cd Tor.Web.Capture
 
 # Build
