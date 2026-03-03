@@ -23,12 +23,11 @@ tokio = { version = "1.44", features = ["full"] }
 tokio-util = "0.7"
 
 # TOR via Arti
-arti-client = { version = "0.19", features = ["tokio"] }
-arti-hyper = "0.19"
-tor-rtcompat = { version = "0.19", features = ["tokio"] }
+arti-client = { version = "0.39", features = ["tokio"] }
+tor-rtcompat = { version = "0.39", features = ["tokio"] }
 
 # HTTP Client
-reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "socks", "json"] }
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "socks", "json", "form"] }
 hyper = { version = "1.5", features = ["full"] }
 hyper-util = "0.1"
 
@@ -44,20 +43,20 @@ askama_axum = "0.4"
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-toml = "0.8"
+toml = "1.0"
 
-# SQLite (version alignée avec arti-client)
-rusqlite = { version = "0.31", features = ["bundled", "chrono"] }
+# SQLite (aligned with arti-client 0.39)
+rusqlite = { version = "0.38", features = ["bundled", "chrono"] }
 r2d2 = "0.8"
-r2d2_sqlite = "0.24"
+r2d2_sqlite = "0.32"
 
 # Google Drive
 yup-oauth2 = "11"
 google-drive3 = "6"
 
 # Scheduler
-tokio-cron-scheduler = "0.13"
-croner = "2.0"
+tokio-cron-scheduler = "0.15"
+croner = "3.0"
 
 # Headless browser
 headless_chrome = "1.0"
@@ -74,7 +73,7 @@ thiserror = "2.0"
 anyhow = "1.0"
 
 # Configuration
-config = "0.14"
+config = "0.15"
 dotenvy = "0.15"
 
 # Utils

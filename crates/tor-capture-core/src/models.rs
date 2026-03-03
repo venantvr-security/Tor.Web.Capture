@@ -15,9 +15,9 @@ pub struct Target {
     pub capture_html: bool,
     pub user_agent_type: UserAgentType,
     pub custom_user_agent: Option<String>,
-    pub viewport_width: u32,
-    pub viewport_height: u32,
-    pub wait_after_load_ms: u64,
+    pub viewport_width: i32,
+    pub viewport_height: i32,
+    pub wait_after_load_ms: i64,
     pub tags: Vec<String>,
     pub notes: Option<String>,
     pub created_at: DateTime<Utc>,
@@ -159,13 +159,13 @@ pub struct Capture {
     pub status: CaptureStatus,
     pub started_at: Option<DateTime<Utc>>,
     pub completed_at: Option<DateTime<Utc>>,
-    pub duration_ms: Option<u64>,
+    pub duration_ms: Option<i64>,
 
     // Capture data
     pub screenshot_path: Option<String>,
-    pub screenshot_size_bytes: Option<u64>,
+    pub screenshot_size_bytes: Option<i64>,
     pub html_path: Option<String>,
-    pub html_size_bytes: Option<u64>,
+    pub html_size_bytes: Option<i64>,
     pub page_title: Option<String>,
     pub final_url: Option<String>,
     pub http_status_code: Option<u16>,
@@ -229,7 +229,7 @@ impl Capture {
         self.status = CaptureStatus::Success;
         self.completed_at = Some(Utc::now());
         if let Some(started) = self.started_at {
-            self.duration_ms = Some((Utc::now() - started).num_milliseconds() as u64);
+            self.duration_ms = Some((Utc::now() - started).num_milliseconds());
         }
     }
 
@@ -239,7 +239,7 @@ impl Capture {
         self.error_type = Some(error_type.to_string());
         self.error_message = Some(error_message.to_string());
         if let Some(started) = self.started_at {
-            self.duration_ms = Some((Utc::now() - started).num_milliseconds() as u64);
+            self.duration_ms = Some((Utc::now() - started).num_milliseconds());
         }
     }
 }

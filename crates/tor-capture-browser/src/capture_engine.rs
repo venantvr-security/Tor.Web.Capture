@@ -43,11 +43,11 @@ impl CaptureEngine {
         // Create screenshot options
         let options = ScreenshotOptions {
             viewport: Viewport {
-                width: target.viewport_width,
-                height: target.viewport_height,
+                width: target.viewport_width as u32,
+                height: target.viewport_height as u32,
             },
             full_page: true,
-            wait_after_load_ms: target.wait_after_load_ms,
+            wait_after_load_ms: target.wait_after_load_ms as u64,
             ..Default::default()
         };
 
@@ -64,7 +64,6 @@ impl CaptureEngine {
 
             // Create new tab
             let tab = browser.new_tab()?;
-            let tab = Arc::new(tab);
 
             // Capture page
             capture_page(
@@ -111,7 +110,7 @@ impl CaptureEngine {
                 .map_err(|e| CaptureError::ScreenshotFailed(format!("Write error: {}", e)))?;
 
             capture.screenshot_path = Some(path.to_string_lossy().to_string());
-            capture.screenshot_size_bytes = Some(screenshot.len() as u64);
+            capture.screenshot_size_bytes = Some(screenshot.len() as i64);
         }
 
         // Save HTML
@@ -124,7 +123,7 @@ impl CaptureEngine {
                 .map_err(|e| CaptureError::HtmlCaptureFailed(format!("Write error: {}", e)))?;
 
             capture.html_path = Some(path.to_string_lossy().to_string());
-            capture.html_size_bytes = Some(html.len() as u64);
+            capture.html_size_bytes = Some(html.len() as i64);
         }
 
         // Update capture metadata

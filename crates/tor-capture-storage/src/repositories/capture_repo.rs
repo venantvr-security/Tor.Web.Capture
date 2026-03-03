@@ -99,7 +99,7 @@ impl CaptureRepository {
             .map_err(|e| StorageError::DatabaseError(e.to_string()))?;
 
         let captures = stmt
-            .query_map(params![target_id.to_string(), limit], |row| {
+            .query_map(params![target_id.to_string(), limit as i64], |row| {
                 Ok(row_to_capture(row))
             })
             .map_err(|e| StorageError::DatabaseError(e.to_string()))?
@@ -125,7 +125,7 @@ impl CaptureRepository {
             .map_err(|e| StorageError::DatabaseError(e.to_string()))?;
 
         let captures = stmt
-            .query_map(params![limit], |row| Ok(row_to_capture(row)))
+            .query_map(params![limit as i64], |row| Ok(row_to_capture(row)))
             .map_err(|e| StorageError::DatabaseError(e.to_string()))?
             .filter_map(|r| r.ok())
             .filter_map(|r| r.ok())

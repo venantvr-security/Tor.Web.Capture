@@ -6,7 +6,6 @@ edition.workspace = true
 [dependencies]
 tor-capture-core.workspace = true
 arti-client.workspace = true
-arti-hyper.workspace = true
 tor-rtcompat.workspace = true
 reqwest.workspace = true
 tokio.workspace = true

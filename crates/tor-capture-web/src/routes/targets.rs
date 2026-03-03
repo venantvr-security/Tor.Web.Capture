@@ -19,9 +19,9 @@ pub struct TargetForm {
     pub capture_html: Option<String>,
     pub user_agent_type: String,
     pub custom_user_agent: Option<String>,
-    pub viewport_width: Option<u32>,
-    pub viewport_height: Option<u32>,
-    pub wait_after_load_ms: Option<u64>,
+    pub viewport_width: Option<i32>,
+    pub viewport_height: Option<i32>,
+    pub wait_after_load_ms: Option<i64>,
 }
 
 pub async fn list(State(state): State<AppState>) -> impl IntoResponse {
